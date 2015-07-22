@@ -1,0 +1,1 @@
+function init(){var t=new YTVideoPlayer;t.callback_progress=function(){t.trace(t.playhead)},t.init("videoPlayer"),t.startmuted=!0,t.autoplay=!0,t.load("NkbP-zzZR2w"),setTimeout(function(){t.stop()},8e3)}$(document).ready(init);
