@@ -55,7 +55,9 @@ YTVideoPlayer.prototype = {
 		autoplay: 0,
 		rel: 0,
 		showinfo: 0,
-		iv_load_policy: 0
+		iv_load_policy: 0,
+		wmode: 'transparent',
+		html5: 1
 	},
 	ismobile: false,
 	videostarted: false,
@@ -252,6 +254,9 @@ YTVideoPlayer.prototype = {
 	stop: function() {
 		this.proxy.stopVideo();
 		this.proxy.clearVideo();
+	},
+	seek: function(num) {
+		this.proxy.seekTo(num);
 	},
 	replay: function() {
 		this.proxy.stopVideo();
