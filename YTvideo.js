@@ -1,7 +1,7 @@
 /*!
  *	YOUTUBE VIDEO HELPER
  *
- *	2.0
+ *	2.6
  *
  *	author: Carlo J. Santos
  *	email: carlosantos@gmail.com
@@ -24,7 +24,7 @@ if(typeof window.YTAPILoaded === 'undefined')
 
 	var onYouTubeIframeAPIReady = function() {
 	 	window.YTAPILoaded = true;
-	 	console.log('YouTube API loaded');
+	 	if(console && debug) console.log('YouTube API loaded');
 	};
 
 	var onPlaybackQualityChange = function(e) {
@@ -32,7 +32,25 @@ if(typeof window.YTAPILoaded === 'undefined')
 	};
 }
 
-var YTVideoPlayer = function(){};
+var YTVideoPlayer = function(){
+
+	var self = this;
+
+	var fslistener = function(e) {
+		if(self.isfs) {
+			self.isfs = false;
+			self.track_exitfs();
+		}
+		else {
+			self.track_enterfs();
+			self.isfs = true;
+		}
+	}
+
+	document.addEventListener("fullscreenchange", fslistener, false);
+	document.addEventListener("mozfullscreenchange", fslistener, false);
+	document.addEventListener("webkitfullscreenchange", fslistener, false);
+};
 
 YTVideoPlayer.prototype = {
 	debug: true,
@@ -61,6 +79,9 @@ YTVideoPlayer.prototype = {
 	},
 	ismobile: false,
 	videostarted: false,
+	iscompleted: false,
+	ismuted: false,
+	isfs: false,
 	userAgent: function() {
 
 		var ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -89,6 +110,9 @@ YTVideoPlayer.prototype = {
 	},
 	init: function(str)
 	{
+
+		var self = this;
+
 		if(this.ismobile === null && typeof this.ismobile === "object") {
 			this.userAgent();
 		}
@@ -98,6 +122,8 @@ YTVideoPlayer.prototype = {
 	load: function(str)
 	{
 		var self = this;
+
+		self.trackReset();
 
 		this.evaluate();
 
@@ -164,6 +190,72 @@ YTVideoPlayer.prototype = {
 	callback_ready: function() {
 		this.trace('Video Ready');
 	},
+	// TRACKING
+
+	track: {
+		started: false,
+		q25: false,
+		q50: false,
+		q75: false
+	},
+
+	trackReset: function() {
+		
+		var self = this;
+		
+		self.track.started = false;
+		self.track.q25 = false;
+		self.track.q50 = false;
+		self.track.q75 = false;
+	},
+	
+	track_start: function() {
+		// console.log('track start');
+	},
+
+	track_play: function() {
+		// console.log('track play');
+	},
+
+	track_replay: function() {
+		// console.log('track replay');
+	},
+
+	track_end: function() {
+		// console.log('track end');
+	},
+
+	track_pause: function() {
+		// console.log('track pause');
+	},
+
+	track_mute: function() {
+		// console.log('track mute');
+	},
+
+	track_unmute: function() {
+		// console.log('track unmute');
+	},
+
+	track_q25: function() {
+		// console.log('track first quartile');
+	},
+
+	track_q50: function() {
+		// console.log('track midpoint');
+	},
+
+	track_q75: function() {
+		// console.log('track third quartile');
+	},
+
+	track_enterfs: function() {
+		
+	},
+
+	track_exitfs: function() {
+		
+	},
 	dlEventListener: function(e) {
 			
 		var self = this;
@@ -175,16 +267,21 @@ YTVideoPlayer.prototype = {
 				self.callback_ready();
 				self.cInterval();
 				self.playhead = 0;
+				self.trackReset();
 			break;
 			case '-1':
 				// UNSTARTED
 				self.trace('unstarted');
 				self.cInterval();
 				self.playhead = 0;
+				self.trackReset();
 			break;
 			case '0':
 				// ENDED
+				this.iscompleted = true;
 				self.callback_end();
+				self.track_end();
+				self.trackReset();
 				self.cInterval();
 				self.playhead = 0;
 			break;
@@ -206,16 +303,76 @@ YTVideoPlayer.prototype = {
 				// FAUX PROGRESS
 				self.callback_progress();
 				self.interval = setInterval(function(){
+					var phpercentage = 0;
+
 					self.playhead = self.proxy.getCurrentTime();
+
+					if(self.duration)
+						phpercentage = ( self.playhead / self.duration ) * 100;
+
+					// QUARTILES
+					if(!self.track.q25 && phpercentage >= 25) {
+					    self.track.q25 = true;
+					    
+						self.track_q25();
+					    
+					}
+					
+					if(!self.track.q50 && phpercentage >= 50) {
+					    self.track.q50 = true;
+					    
+					    self.track_q50();
+					    
+					}
+					
+					if(!self.track.q75 && phpercentage >= 75) {
+					    self.track.q75 = true;
+					    
+					    self.track_q75();
+					    
+					}
+
+					// MUTE STATE TRACKER
+					if(self.ismuted && !self.proxy.isMuted()) {
+						self.ismuted = false;
+						self.track_unmute();
+					}
+
+					if(!self.ismuted && self.proxy.isMuted()) {
+						self.ismuted = true;
+						self.track_mute();
+					}
+
+
 					self.callback_progress();
+
 				}, 250);
 
 				self.callback_play();
+				
+				if(!self.track.started && !self.iscompleted) {
+					self.track.started = true;
+					self.track_start();
+				}
+				else {
+					if(self.iscompleted) {
+						self.iscompleted = false;
+						self.track.started = true;
+						self.track_replay();
+					} else {
+						self.track_play();
+					}
+				}
+
 			break;
 			case '2':
 				// PAUSED
 				self.cInterval();
-				self.callback_pause();
+				
+				if( self.duration > self.playhead ) {
+					self.callback_pause();
+					self.track_pause();
+				}
 			break;
 			case '3':
 				// BUFFERING
@@ -254,6 +411,8 @@ YTVideoPlayer.prototype = {
 	stop: function() {
 		this.proxy.stopVideo();
 		this.proxy.clearVideo();
+		this.trackReset();
+		this.iscompleted = false;
 	},
 	seek: function(num) {
 		this.proxy.seekTo(num);
@@ -277,6 +436,8 @@ YTVideoPlayer.prototype = {
 	},
 	destroy: function() {
 		
+		this.trackReset();
+
 		if(this.proxy)
 		{
 			this.stop();
@@ -289,6 +450,8 @@ YTVideoPlayer.prototype = {
 		
 			this.proxy.destroy();
 			this.proxy = null;
+
+			this.isfs = false;
 		}
 
 	},
