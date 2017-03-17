@@ -7,7 +7,7 @@
 		"uuidString": "52A4B5A6-7E92-41EA-9BE7-CCF9E0C4CE70"
 		}
 	],
-"creatorBuild": "25504",
+"creatorBuild": "25704",
 "files": {
 	"\/demo\/public_html\/index.html": {
 		"ft": 8192,
@@ -43,23 +43,14 @@
 		"sC": 0,
 		"tS": 0
 		},
-	"\/demo\/src\/.sass-cache\/c5802ed420632a126c5c8fc9bb9e78466013e31f\/global.sassc": {
-		"ft": 8192,
-		"oA": 2,
-		"oAP": "\/demo\/src\/.sass-cache\/c5802ed420632a126c5c8fc9bb9e78466013e31f\/global.sassc",
-		"oF": 0
-		},
-	"\/demo\/src\/.sass-cache\/c5802ed420632a126c5c8fc9bb9e78466013e31f\/reset.sassc": {
-		"ft": 8192,
-		"oA": 2,
-		"oAP": "\/demo\/src\/.sass-cache\/c5802ed420632a126c5c8fc9bb9e78466013e31f\/reset.sassc",
-		"oF": 0
-		},
-	"\/demo\/src\/.sass-cache\/c5802ed420632a126c5c8fc9bb9e78466013e31f\/style.sassc": {
-		"ft": 8192,
-		"oA": 2,
-		"oAP": "\/demo\/src\/.sass-cache\/c5802ed420632a126c5c8fc9bb9e78466013e31f\/style.sassc",
-		"oF": 0
+	"\/demo\/src\/device.js": {
+		"ft": 64,
+		"mi": 1,
+		"oA": 1,
+		"oAP": "\/public_html\/device.js",
+		"oF": 0,
+		"sC": 0,
+		"tS": 0
 		},
 	"\/demo\/src\/global.sass": {
 		"aP": 0,
@@ -135,15 +126,6 @@
 		"rFN": 0,
 		"uCM": 0
 		},
-	"\/YTvideo-min.js": {
-		"ft": 64,
-		"mi": 1,
-		"oA": 1,
-		"oAP": "\/public_html\/YTvideo-min.js",
-		"oF": 1,
-		"sC": 0,
-		"tS": 0
-		},
 	"\/YTvideo.js": {
 		"ft": 64,
 		"mi": 1,
@@ -181,7 +163,7 @@
 	"alwaysUseExternalServer": 0,
 	"animateCSSInjections": 1,
 	"autoBuildNewItems": 1,
-	"autoprefixerBrowserString": "> 1%, last 2 versions, Firefox ESR, Opera 12.1",
+	"autoprefixerBrowserString": "> 1%",
 	"babelAuxiliaryCommentAfter": "",
 	"babelAuxiliaryCommentBefore": "",
 	"babelConfigFileHandlingType": 0,
@@ -846,6 +828,10 @@
 			"active": 1,
 			"optionString": ""
 			},
+		"no-compare-neg-zero": {
+			"active": 0,
+			"optionString": ""
+			},
 		"no-cond-assign": {
 			"active": 1,
 			"optionString": "'except-parens'"
@@ -1043,6 +1029,10 @@
 			"optionString": "{'grouping': false, 'allowCall': false }"
 			},
 		"no-mixed-spaces-and-tabs": {
+			"active": 0,
+			"optionString": ""
+			},
+		"no-multi-assign": {
 			"active": 0,
 			"optionString": ""
 			},
@@ -1322,6 +1312,10 @@
 			"active": 0,
 			"optionString": ""
 			},
+		"nonblock-statement-body-position": {
+			"active": 0,
+			"optionString": "'beside'"
+			},
 		"object-curly-newline": {
 			"active": 0,
 			"optionString": "{'ObjectExpression': {'multiline': true}, 'ObjectPattern': {'multiline': true}}"
@@ -1373,6 +1367,10 @@
 		"prefer-numeric-literals": {
 			"active": 0,
 			"optionString": ""
+			},
+		"prefer-promise-reject-errors": {
+			"active": 0,
+			"optionString": "{'allowEmptyReject': false}"
 			},
 		"prefer-rest-params": {
 			"active": 0,
@@ -1467,6 +1465,10 @@
 			"optionString": ""
 			},
 		"template-curly-spacing": {
+			"active": 0,
+			"optionString": "'never'"
+			},
+		"template-tag-spacing": {
 			"active": 0,
 			"optionString": "'never'"
 			},
@@ -1913,7 +1915,8 @@
 		"autoOutputPathRelativePath": "",
 		"autoOutputPathReplace1": "",
 		"autoOutputPathReplace2": "",
-		"autoOutputPathStyle": 0
+		"autoOutputPathStyle": 0,
+		"quality": 100
 		},
 	"languageDefaultsJS": {
 		"autoOutputAction": 0,
@@ -2006,7 +2009,9 @@
 		"autoOutputPathRelativePath": "",
 		"autoOutputPathReplace1": "",
 		"autoOutputPathReplace2": "",
-		"autoOutputPathStyle": 0
+		"autoOutputPathStyle": 0,
+		"enableLossy": 1,
+		"quality": 100
 		},
 	"languageDefaultsPUG": {
 		"autoOutputAction": 0,

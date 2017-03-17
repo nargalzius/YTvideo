@@ -1,3 +1,5 @@
+// @codekit-prepend "device.js"
+
 $( document ).ready(init);
 
 function init(){
