@@ -1,7 +1,7 @@
 /*!
  *	YOUTUBE VIDEO HELPER
  *
- *	2.7
+ *	2.8
  *
  *	author: Carlo J. Santos
  *	email: carlosantos@gmail.com
@@ -62,20 +62,23 @@ YTVideoPlayer.prototype = {
 	autoplay: false,
 	allowfullscreen: false,
 	annotations: false,
+	captions: false,
 	startmuted: false,
 	duration: null,
 	playhead: null,
 	loop: false,
 	interval: null,
 	vars: {
-		controls: 1,
-		autohide: 1,
-		modestbranding: 1,
 		autoplay: 0,
+		controls: 1,
+		modestbranding: 1,
+		disablekb: 1,
 		rel: 0,
 		showinfo: 0,
 		iv_load_policy: 0,
-		wmode: 'transparent',
+		cc_load_policy: 0,	
+		playsinline: 1,
+		enablejsapi: 1,
 		html5: 1
 	},
 	ismobile: false,
@@ -118,11 +121,18 @@ YTVideoPlayer.prototype = {
 		this.playhead = null;
 		this.duration = null;
 		
-		if(this.chromeless) {this.vars.controls = 0;} else {this.vars.controls = 2;}
-		if(this.autoplay) {this.vars.autoplay = 1;} else {this.vars.autoplay = 0;}
-		if(this.allowfullscreen) {this.vars.fs = 1;} else {this.vars.fs = 0;}
-		if(this.annotations) {this.vars.iv_load_policy = 1;} else {this.vars.iv_load_policy = 0;}
-		if(this.loop) {this.vars.loop = 1;} else {this.vars.loop = 0;}
+		this.vars.iv_load_policy = ( this.annotations ) ? 1 : 0;
+		this.vars.cc_load_policy = ( this.captions ) ? 1 : 0;
+		this.vars.controls = ( this.chromeless ) ? 0 : 1;
+		this.vars.autoplay = ( this.autoplay ) ? 1 : 0;
+		this.vars.fs = ( this.allowfullscreen ) ? 1 : 0;
+		this.vars.loop = ( this.loop ) ? 1 : 0;
+
+		// this.vars.start
+		// this.vars.end
+		// this.vars.origin = window.location.hostname;
+		// this.vars.widget_referrer
+
 	},
 	init: function(str)
 	{
