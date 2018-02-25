@@ -18,12 +18,12 @@ function init(){
     video.captions = true;
     video.load('NkbP-zzZR2w');
 
-    video2.destroy();
+    // video2.destroy();
     video2.init('videoPlayerSmall');
     video2.chromeless = true;
     video2.autoplay = true;
     video2.startmuted = true;
     video2.load('M7lc1UVf-VE');
-    video2.stop();
+    // video2.stop();
 }
 

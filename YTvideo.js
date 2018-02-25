@@ -1,7 +1,7 @@
 /*!
  *	YOUTUBE VIDEO HELPER
  *
- *	2.9
+ *	2.10
  *
  *	author: Carlo J. Santos
  *	email: carlosantos@gmail.com
@@ -447,36 +447,40 @@ YTVideoPlayer.prototype = {
 	},
 	play() {
 		const SELF = this;
-		SELF.proxy.playVideo();
+		if(SELF.proxy) SELF.proxy.playVideo();
 	},
 	pause() {
 		const SELF = this;
-		SELF.proxy.pauseVideo();
+		if(SELF.proxy) SELF.proxy.pauseVideo();
 	},
 	stop() {
 		const SELF = this;
-		SELF.proxy.stopVideo();
-		SELF.proxy.clearVideo();
+		if(SELF.proxy) {
+			SELF.proxy.stopVideo();
+			SELF.proxy.clearVideo();
+		}
 		SELF.trackReset();
 		SELF.iscompleted = false;
 	},
 	seek(num) {
 		const SELF = this;
-		SELF.proxy.seekTo(num);
+		if(SELF.proxy) SELF.proxy.seekTo(num);
 	},
 	replay() {
 		const SELF = this;
-		SELF.proxy.stopVideo();
-		SELF.proxy.clearVideo();
-		SELF.proxy.playVideo();
+		if(SELF.proxy) {
+			SELF.proxy.stopVideo();
+			SELF.proxy.clearVideo();
+			SELF.proxy.playVideo();
+		}
 	},
 	mute() {
 		const SELF = this;
-		SELF.proxy.mute();
+		if(SELF.proxy) SELF.proxy.mute();
 	},
 	unmute() {
 		const SELF = this;
-		SELF.proxy.unMute();
+		if(SELF.proxy) SELF.proxy.unMute();
 	},
 	isMuted() {
 		const SELF = this;
@@ -510,7 +514,7 @@ YTVideoPlayer.prototype = {
 	},
 	reflow() {
 		const SELF = this;
-		SELF.proxy.setSize(SELF.dom_container.offsetWidth, SELF.dom_container.offsetHeight);
+		if(SELF.proxy) SELF.proxy.setSize(SELF.dom_container.offsetWidth, SELF.dom_container.offsetHeight);
 	},
 	cInterval() {
 		const SELF = this;
