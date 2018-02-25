@@ -1,7 +1,7 @@
 /*!
  *	YOUTUBE VIDEO HELPER
  *
- *	2.9
+ *	2.10
  *
  *	author: Carlo J. Santos
  *	email: carlosantos@gmail.com
@@ -10,40 +10,15 @@
  *	Copyright (c) 2015, All Rights Reserved, www.nargalzius.com
  */
 
-//var console, YTAPILoaded, YT; // FOR DEBUGGING
-
-if(typeof window.YTAPILoaded === 'undefined')
-{
-	window.YTAPILoaded = false;
-
-	var tag = document.createElement('script');
-		tag.src = "https://www.youtube.com/iframe_api";
-
-	var firstScriptTag = document.getElementsByTagName('script')[0];
-		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-	var onYouTubeIframeAPIReady = function() {
-	 	window.YTAPILoaded = true;
-	 	if(window.console && typeof debug !== 'undefined') console.log('YouTube API loaded');
-	};
-
-	var onPlaybackQualityChange = function(e) {
-		console.log('quality changed to: '+e);
-	};
-}
-
-// var YTVideoPlayer = function(){
 function YTVideoPlayer() {
-	const SELF = this;
-
-	var fslistener = function(e) {
-		if(SELF.isfs) {
-			SELF.isfs = false;
-			SELF.track_exitfs();
+	var fslistener = (e) => {
+		if(this.isfs) {
+			this.isfs = false;
+			this.track_exitfs();
 		}
 		else {
-			SELF.track_enterfs();
-			SELF.isfs = true;
+			this.track_enterfs();
+			this.isfs = true;
 		}
 	}
 
@@ -85,15 +60,15 @@ YTVideoPlayer.prototype = {
 	iscompleted: false,
 	ismuted: false,
 	isfs: false,
+	api: false,
 	checkForMobile() {
-		const SELF = this;
 		const DESKTOP_AGENTS = [
 	        'desktop'
 	    ];
 
 	    let mobileFlag = true;
 
-	    if(typeof device !== 'undefined') {
+	    if( window['device'] ) {
 	        // USE DEVICEJS IF AVAILABLE
 	        for (let i = 0; i < DESKTOP_AGENTS.length; i++) {
 	            let regex;
@@ -109,122 +84,98 @@ YTVideoPlayer.prototype = {
 	    }
 
 	    if( mobileFlag ) {
-	        SELF.ismobile = true;
-	        SELF.trace("mobile browser detected");
+	        this.ismobile = true;
+	        this.trace("mobile browser detected");
 	    } else {
-	        SELF.ismobile = false;
-	        SELF.trace("desktop browser detected");
+	        this.ismobile = false;
+	        this.trace("desktop browser detected");
 	    }
 	},
 
 	evaluate() {
-		const SELF = this;
 		
-		SELF.cInterval();
+		this.cInterval();
 		
-		SELF.videostarted = false;
-		SELF.playhead = null;
-		SELF.duration = null;
+		this.videostarted = false;
+		this.playhead = null;
+		this.duration = null;
 		
-		SELF.vars.iv_load_policy = ( SELF.annotations ) ? 1 : 0;
-		SELF.vars.cc_load_policy = ( SELF.captions ) ? 1 : 0;
-		SELF.vars.controls = ( SELF.chromeless ) ? 0 : 1;
-		SELF.vars.autoplay = ( SELF.autoplay ) ? 1 : 0;
-		SELF.vars.fs = ( SELF.allowfullscreen ) ? 1 : 0;
-		SELF.vars.loop = ( SELF.loop ) ? 1 : 0;
+		this.vars.iv_load_policy = ( this.annotations ) ? 1 : 0;
+		this.vars.cc_load_policy = ( this.captions ) ? 1 : 0;
+		this.vars.controls = ( this.chromeless ) ? 0 : 1;
+		this.vars.autoplay = ( this.autoplay ) ? 1 : 0;
+		this.vars.fs = ( this.allowfullscreen ) ? 1 : 0;
+		this.vars.loop = ( this.loop ) ? 1 : 0;
 
-		// SELF.vars.start
-		// SELF.vars.end
-		// SELF.vars.origin = window.location.hostname;
-		// SELF.vars.widget_referrer
+		// this.vars.start
+		// this.vars.end
+		// this.vars.origin = window.location.hostname;
+		// this.vars.widget_referrer
 
 	},
 	init(str) {
-		const SELF = this;
 
-		if(SELF.ismobile === null) { SELF.checkForMobile(); }
+		if(this.ismobile === null) { this.checkForMobile(); }
 
-		SELF.dom_container = document.getElementById(str);
+		this.dom_container = document.getElementById(str);
 	},
 	load(str) {
-		const SELF = this;
 
-		SELF.trackReset();
+		this.trackReset();
 
-		SELF.evaluate();
+		this.evaluate();
 
-		if( YTAPILoaded ) {
+		if( window['YT'] && YT.loaded ) {
 
-			if(!SELF.playerloaded) {
-				SELF.proxy = new YT.Player(SELF.dom_container.id, {
-					height: SELF.dom_container.offsetHeight,
-					width: SELF.dom_container.offsetWidth,
+			if(!this.playerloaded) {
+				this.proxy = new YT.Player(this.dom_container.id, {
+					height: this.dom_container.offsetHeight,
+					width: this.dom_container.offsetWidth,
 					videoId: str,	
 					events: {
-						'onReady'(e){ 
-							SELF.dlEventListener(e);
+						'onReady': (e) => { 
+							this.dlEventListener(e);
 						},
-						'onStateChange'(e){ 
-							SELF.dlEventListener(e);
+						'onStateChange': (e) => { 
+							this.dlEventListener(e);
 						},
-						'onPlaybackQualityChange'(e){ 
-							SELF.dlEventListener(e);
+						'onPlaybackQualityChange': (e) => { 
+							this.dlEventListener(e);
 						}
 					},
-					playerVars: SELF.vars
+					playerVars: this.vars
 				});
 
-				SELF.proxy.controls = 0;
+				this.proxy.controls = 0;
 
-				SELF.playerloaded = true;
+				this.playerloaded = true;
 			}
 			else
 			{
 				var tobj = {
 					'videoId': str,
-					'playerVars': SELF.vars
+					'playerVars': this.vars
 				};
 
-				if(!SELF.ismobile) {
-					SELF.proxy.loadVideoById(tobj);
+				if(!this.ismobile) {
+					this.proxy.loadVideoById(tobj);
 				}
 
 			}
 
 		} else { 	
-			setTimeout(function(){ SELF.load(str); }, 500);
+			setTimeout( () => { this.load(str); }, 1000 );
 		}
 	},
-	callback_end() {
-		const SELF = this;
-			  SELF.trace('------------------ callback_end');
-	},
-	callback_play() {
-		const SELF = this;
-			  SELF.trace('------------------ callback_play');
-	},
-	callback_pause() {
-		const SELF = this;
-			  SELF.trace('------------------ callback_pause');
-	},
-	callback_volumechange() {
-		const SELF = this;
-			  SELF.trace('------------------ callback_volumechange');
-	},
-	callback_loading() {
-		const SELF = this;
-			  SELF.trace('------------------ callback_loading');
-	},
-	callback_progress() {
-		const SELF = this;
-			  SELF.trace('------------------ callback_progress');
-	},
-	callback_ready() {
-		const SELF = this;
-			  SELF.trace('------------------ callback_ready');
-	},
+	callback_ready() 		{ this.trace('------------------ callback_ready'); },
+	callback_end() 			{ this.trace('------------------ callback_end'); },
+	callback_play() 		{ this.trace('------------------ callback_play'); },
+	callback_pause() 		{ this.trace('------------------ callback_pause'); },
+	callback_volumechange() { this.trace('------------------ callback_volumechange'); },
+	callback_loading() 		{ /* this.trace('------------------ callback_loading');  */ },
+	callback_progress() 	{ /* this.trace('------------------ callback_progress'); */ },
+	
 	// TRACKING
-
 	track: {
 		started: false,
 		q25: false,
@@ -233,194 +184,146 @@ YTVideoPlayer.prototype = {
 	},
 
 	trackReset() {
-		const SELF = this;
 		
-		SELF.track.started = false;
-		SELF.track.q25 = false;
-		SELF.track.q50 = false;
-		SELF.track.q75 = false;
+		this.track.started = false;
+		this.track.q25 = false;
+		this.track.q50 = false;
+		this.track.q75 = false;
 	},
 	
-	track_start() {
-		const SELF = this;
-			  SELF.trace('------------------ track_start');
-	},
+	track_start() 	{ this.trace('------------------ track_start'); },
+	track_play() 	{ this.trace('------------------ track_play'); },
+	track_replay() 	{ this.trace('------------------ track_replay'); },
+	track_end() 	{ this.trace('------------------ track_end'); },
+	track_pause() 	{ this.trace('------------------ track_pause'); },
+	track_mute() 	{ this.trace('------------------ track_mute'); },
+	track_unmute() 	{ this.trace('------------------ track_unmute'); },
+	track_q25() 	{ this.trace('------------------ track_q25'); },
+	track_q50() 	{ this.trace('------------------ track_q50'); },
+	track_q75() 	{ this.trace('------------------ track_q75'); },
+	track_enterfs() { this.trace('------------------ track_enterfs'); },
+	track_exitfs() 	{ this.trace('------------------ track_exitfs'); },
 
-	track_play() {
-		const SELF = this;
-			  SELF.trace('------------------ track_play');
-	},
-
-	track_replay() {
-		const SELF = this;
-			  SELF.trace('------------------ track_replay');
-	},
-
-	track_end() {
-		const SELF = this;
-			  SELF.trace('------------------ track_end');
-	},
-
-	track_pause() {
-		const SELF = this;
-			  SELF.trace('------------------ track_pause');
-	},
-
-	track_mute() {
-		const SELF = this;
-			  SELF.trace('------------------ track_mute');
-	},
-
-	track_unmute() {
-		const SELF = this;
-			  SELF.trace('------------------ track_unmute');
-	},
-
-	track_q25() {
-		const SELF = this;
-			  SELF.trace('------------------ track_q25');
-	},
-
-	track_q50() {
-		const SELF = this;
-			  SELF.trace('------------------ track_q50');
-	},
-
-	track_q75() {
-		const SELF = this;
-			  SELF.trace('------------------ track_q75');
-	},
-
-	track_enterfs() {
-		const SELF = this;
-			  SELF.trace('------------------ track_enterfs');
-	},
-
-	track_exitfs() {
-		const SELF = this;
-			  SELF.trace('------------------ track_exitfs');
-	},
 	dlEventListener(e) {
-		const SELF = this;
 
 		switch( String(e.data) )
 		{
 			case 'null':
 				// READY
-				SELF.callback_ready();
-				SELF.cInterval();
-				SELF.playhead = 0;
-				SELF.trackReset();
+				this.callback_ready();
+				this.cInterval();
+				this.playhead = 0;
+				this.trackReset();
 			break;
 			case '-1':
 				// UNSTARTED
-				SELF.trace('unstarted');
-				SELF.cInterval();
-				SELF.playhead = 0;
-				SELF.trackReset();
+				this.trace('unstarted');
+				this.cInterval();
+				this.playhead = 0;
+				this.trackReset();
 			break;
 			case '0':
 				// ENDED
-				SELF.iscompleted = true;
-				SELF.callback_end();
-				SELF.track_end();
-				SELF.trackReset();
-				SELF.cInterval();
-				SELF.playhead = 0;
+				this.iscompleted = true;
+				this.callback_end();
+				this.track_end();
+				this.trackReset();
+				this.cInterval();
+				this.playhead = 0;
 			break;
 			case '1':
 				// PLAYING
-				if(!SELF.videostarted)
+				if(!this.videostarted)
 				{
-					SELF.duration = SELF.proxy.getDuration();
+					this.duration = this.proxy.getDuration();
 
-					if(SELF.startmuted) {
-						SELF.mute();
+					if(this.startmuted) {
+						this.mute();
 					} else {
-						SELF.unmute();
+						this.unmute();
 					}
 
-					SELF.videostarted = true;
+					this.videostarted = true;
 				}
 
 				// FAUX PROGRESS
-				SELF.callback_progress();
-				SELF.interval = setInterval(function(){
+				this.callback_progress();
+				this.interval = setInterval( () => {
 					var phpercentage = 0;
 
-					SELF.playhead = SELF.proxy.getCurrentTime();
+					this.playhead = this.proxy.getCurrentTime();
 
-					if(SELF.duration)
-						phpercentage = ( SELF.playhead / SELF.duration ) * 100;
+					if(this.duration)
+						phpercentage = ( this.playhead / this.duration ) * 100;
 
 					// QUARTILES
-					if(!SELF.track.q25 && phpercentage >= 25) {
-					    SELF.track.q25 = true;
+					if(!this.track.q25 && phpercentage >= 25) {
+					    this.track.q25 = true;
 					    
-						SELF.track_q25();
-					    
-					}
-					
-					if(!SELF.track.q50 && phpercentage >= 50) {
-					    SELF.track.q50 = true;
-					    
-					    SELF.track_q50();
+						this.track_q25();
 					    
 					}
 					
-					if(!SELF.track.q75 && phpercentage >= 75) {
-					    SELF.track.q75 = true;
+					if(!this.track.q50 && phpercentage >= 50) {
+					    this.track.q50 = true;
 					    
-					    SELF.track_q75();
+					    this.track_q50();
+					    
+					}
+					
+					if(!this.track.q75 && phpercentage >= 75) {
+					    this.track.q75 = true;
+					    
+					    this.track_q75();
 					    
 					}
 
 					// MUTE STATE TRACKER
-					if(SELF.ismuted && !SELF.proxy.isMuted()) {
-						SELF.ismuted = false;
-						SELF.track_unmute();
+					if(this.ismuted && !this.proxy.isMuted()) {
+						this.ismuted = false;
+						this.track_unmute();
 					}
 
-					if(!SELF.ismuted && SELF.proxy.isMuted()) {
-						SELF.ismuted = true;
-						SELF.track_mute();
+					if(!this.ismuted && this.proxy.isMuted()) {
+						this.ismuted = true;
+						this.track_mute();
 					}
 
 
-					SELF.callback_progress();
+					this.callback_progress();
 
 				}, 250);
 
-				SELF.callback_play();
+				this.callback_play();
 				
-				if(!SELF.track.started && !SELF.iscompleted) {
-					SELF.track.started = true;
-					SELF.track_start();
+				if(!this.track.started && !this.iscompleted) {
+					this.track.started = true;
+					this.track_start();
 				}
 				else {
-					if(SELF.iscompleted) {
-						SELF.iscompleted = false;
-						SELF.track.started = true;
-						SELF.track_replay();
+					if(this.iscompleted) {
+						this.iscompleted = false;
+						this.track.started = true;
+						this.track_replay();
 					} else {
-						SELF.track_play();
+						this.track_play();
 					}
 				}
 
 			break;
 			case '2':
 				// PAUSED
-				SELF.cInterval();
+				this.cInterval();
 				
-				if( SELF.duration > SELF.playhead ) {
-					SELF.callback_pause();
-					SELF.track_pause();
+				if( this.duration > this.playhead ) {
+					this.callback_pause();
+					this.track_pause();
 				}
 			break;
 			case '3':
 				// BUFFERING
-				SELF.cInterval();
-				SELF.callback_loading();
+				this.cInterval();
+				this.callback_loading();
 			break;
 			case 'tiny':
 
@@ -446,88 +349,95 @@ YTVideoPlayer.prototype = {
 		}
 	},
 	play() {
-		const SELF = this;
-		SELF.proxy.playVideo();
+		if(this.proxy) this.proxy.playVideo();
 	},
 	pause() {
-		const SELF = this;
-		SELF.proxy.pauseVideo();
+		if(this.proxy) this.proxy.pauseVideo();
 	},
 	stop() {
-		const SELF = this;
-		SELF.proxy.stopVideo();
-		SELF.proxy.clearVideo();
-		SELF.trackReset();
-		SELF.iscompleted = false;
+		if(this.proxy) {
+			this.proxy.stopVideo();
+			this.proxy.clearVideo();
+		}
+		this.trackReset();
+		this.iscompleted = false;
 	},
 	seek(num) {
-		const SELF = this;
-		SELF.proxy.seekTo(num);
+		if(this.proxy) this.proxy.seekTo(num);
 	},
 	replay() {
-		const SELF = this;
-		SELF.proxy.stopVideo();
-		SELF.proxy.clearVideo();
-		SELF.proxy.playVideo();
+		if(this.proxy) {
+			this.proxy.stopVideo();
+			this.proxy.clearVideo();
+			this.proxy.playVideo();
+		}
 	},
 	mute() {
-		const SELF = this;
-		SELF.proxy.mute();
+		if(this.proxy) this.proxy.mute();
 	},
 	unmute() {
-		const SELF = this;
-		SELF.proxy.unMute();
+		if(this.proxy) this.proxy.unMute();
 	},
 	isMuted() {
-		const SELF = this;
-		return SELF.proxy.isMuted();
+		return this.proxy.isMuted();
 	},
 	isPlaying() {
-		const SELF = this;
-		return SELF.isplaying;
+		return this.isplaying;
 	},
 	destroy() {
-		const SELF = this;
 
-		SELF.trackReset();
+		this.trackReset();
 
-		if(SELF.proxy)
+		if(this.proxy)
 		{
-			SELF.stop();
+			this.stop();
 
-			SELF.cInterval();
-			SELF.playhead = 0;
+			this.cInterval();
+			this.playhead = 0;
 
-			SELF.videostarted = false;
-			SELF.playerloaded = false;
+			this.videostarted = false;
+			this.playerloaded = false;
 		
-			SELF.proxy.destroy();
-			SELF.proxy = null;
+			this.proxy.destroy();
+			this.proxy = null;
 
-			SELF.isfs = false;
+			this.isfs = false;
 		}
 
 	},
 	reflow() {
-		const SELF = this;
-		SELF.proxy.setSize(SELF.dom_container.offsetWidth, SELF.dom_container.offsetHeight);
+		if(this.proxy) this.proxy.setSize(this.dom_container.offsetWidth, this.dom_container.offsetHeight);
 	},
 	cInterval() {
-		const SELF = this;
-		clearInterval(SELF.interval);
+		clearInterval(this.interval);
 	},
 	trace(str) { 
-		const SELF = this;
 
-		if(SELF.debug) {
+		if(this.debug) {
 
 			if(window.console) {
 				window.console.log(str);
 			}
 
-			if( SELF.dom_debug ) {
-				SELF.dom_debug.innerHTML += str + '<br>';
+			if( this.dom_debug ) {
+				this.dom_debug.innerHTML += str + '<br>';
 			}
 		}
 	}
 };
+
+if( !window['YT'] ) {
+	let checkDebug = ( window['console'] && window['debug'] && debug ) ? true : false;
+
+	// NO API YET, LOAD MANUALLY
+	if(checkDebug) console.log('LOADING YT API');
+	var tag = document.createElement('script');
+		tag.src = "https://www.youtube.com/iframe_api";
+
+	var firstScriptTag = document.getElementsByTagName('script')[0];
+		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+	var onYouTubeIframeAPIReady = () => {
+	 	if(checkDebug) console.log('YouTube API loaded');
+	};
+}
