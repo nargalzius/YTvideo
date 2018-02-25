@@ -7,7 +7,7 @@
 		"uuidString": "52A4B5A6-7E92-41EA-9BE7-CCF9E0C4CE70"
 		}
 	],
-"creatorBuild": "26261",
+"creatorBuild": "26268",
 "files": {
 	"\/demo\/public_html\/index.html": {
 		"cB": 0,
@@ -140,7 +140,7 @@
 		"oAP": "\/demo\/public_html\/YTvideo-min.js",
 		"oF": 2,
 		"sC": 0,
-		"tS": 0
+		"tS": 1
 		},
 	"\/YTvideo.sublime-project": {
 		"cB": 0,
@@ -182,6 +182,7 @@
 	"animateCSSInjections": 1,
 	"autoBuildNewItems": 1,
 	"autoprefixerBrowserString": "> 1%",
+	"autoprefixerEnableIEGrid": 0,
 	"babelAuxiliaryCommentAfter": "",
 	"babelAuxiliaryCommentBefore": "",
 	"babelConfigFileHandlingType": 0,
