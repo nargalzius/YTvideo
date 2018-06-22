@@ -1,7 +1,7 @@
 /*!
  *	YOUTUBE VIDEO HELPER
  *
- *	2.10
+ *	2.2
  *
  *	author: Carlo J. Santos
  *	email: carlosantos@gmail.com
@@ -11,7 +11,7 @@
  */
 
 function YTVideoPlayer() {
-	var fslistener = (e) => {
+	let fslistener = (e) => {
 		if(this.isfs) {
 			this.isfs = false;
 			this.track_exitfs();
@@ -32,28 +32,40 @@ YTVideoPlayer.prototype = {
 	dom_debug: null,
 	playerloaded: false,
 	proxy: null,
-	chromeless: false,
-	autoplay: false,
 	allowfullscreen: false,
-	annotations: false,
-	captions: false,
-	startmuted: false,
 	duration: null,
 	playhead: null,
-	loop: false,
 	interval: null,
-	vars: {
+	params: {},
+	default_params: {
+		id: 'video',
+		src: 'NkbP-zzZR2w',
+		annotations: false,
+		captions: false,
+		chromeless: false,
+		autoplay: false,
+		allowfullscreen: false, 
+		loop: false,
+		startmuted: false,
+	},
+	vars: {},
+	default_vars: {
 		autoplay: 0,
 		controls: 1,
 		modestbranding: 1,
 		disablekb: 1,
 		rel: 0,
 		showinfo: 0,
-		iv_load_policy: 0,
+		// iv_load_policy: 0,
+		iv_load_policy: 3,
 		cc_load_policy: 0,	
 		playsinline: 1,
 		enablejsapi: 1,
-		html5: 1
+		html5: 1,
+		color: 'white',
+		fs: 1,
+		loop: 0,
+
 	},
 	ismobile: false,
 	videostarted: false,
@@ -92,79 +104,96 @@ YTVideoPlayer.prototype = {
 	    }
 	},
 
-	evaluate() {
+	evaluate(params) {
 		
 		this.cInterval();
 		
 		this.videostarted = false;
 		this.playhead = null;
 		this.duration = null;
-		
-		this.vars.iv_load_policy = ( this.annotations ) ? 1 : 0;
-		this.vars.cc_load_policy = ( this.captions ) ? 1 : 0;
-		this.vars.controls = ( this.chromeless ) ? 0 : 1;
-		this.vars.autoplay = ( this.autoplay ) ? 1 : 0;
-		this.vars.fs = ( this.allowfullscreen ) ? 1 : 0;
-		this.vars.loop = ( this.loop ) ? 1 : 0;
 
-		// this.vars.start
-		// this.vars.end
+		this.params = {};
+		Object.assign(this.params, this.default_params);
+		if(params) for( let key in params ) this.params[key] = params[key];
+
+		this.vars = {};
+		Object.assign(this.vars, this.default_vars);
+		
+		this.vars.iv_load_policy = ( this.params.annotations ) ? 1 : 0;
+		this.vars.cc_load_policy = ( this.params.captions ) ? 1 : 0;
+		this.vars.controls = ( this.params.chromeless ) ? 0 : 1;
+		this.vars.autoplay = ( this.params.autoplay ) ? 1 : 0;
+		this.vars.fs = ( this.params.allowfullscreen ) ? 1 : 0;
+		this.vars.loop = ( this.params.loop ) ? 1 : 0;
+
+		if( this.params.start )
+			this.vars.start = this.params.start;
+
+		if( this.params.end )
+			this.vars.end = this.params.end;
+
 		// this.vars.origin = window.location.hostname;
 		// this.vars.widget_referrer
 
 	},
-	init(str) {
-
-		if(this.ismobile === null) { this.checkForMobile(); }
-
-		this.dom_container = document.getElementById(str);
-	},
-	load(str) {
-
-		this.trackReset();
-
-		this.evaluate();
+	init(params) {
 
 		if( window['YT'] && YT.loaded ) {
 
-			if(!this.playerloaded) {
-				this.proxy = new YT.Player(this.dom_container.id, {
-					height: this.dom_container.offsetHeight,
-					width: this.dom_container.offsetWidth,
-					videoId: str,	
-					events: {
-						'onReady': (e) => { 
-							this.dlEventListener(e);
-						},
-						'onStateChange': (e) => { 
-							this.dlEventListener(e);
-						},
-						'onPlaybackQualityChange': (e) => { 
-							this.dlEventListener(e);
-						}
+			this.evaluate(params);
+
+			if(this.ismobile === null) { this.checkForMobile(); }
+
+			this.dom_container = document.getElementById(params.id);
+
+			this.load(this.params)
+
+		} else {
+			setTimeout(() => {
+				this.init(params);
+			}, 1000);
+		}
+	},
+	load(params) {
+
+		this.trackReset();
+
+		this.evaluate(params);
+
+		if(!this.playerloaded) {
+			this.proxy = new YT.Player(this.dom_container.id, {
+				height: this.dom_container.offsetHeight,
+				width: this.dom_container.offsetWidth,
+				videoId: this.params.src,	
+				events: {
+					'onReady': (e) => { 
+						this.dlEventListener(e);
 					},
-					playerVars: this.vars
-				});
+					'onStateChange': (e) => { 
+						this.dlEventListener(e);
+					},
+					'onPlaybackQualityChange': (e) => { 
+						this.dlEventListener(e);
+					}
+				},
+				playerVars: this.vars
+			});
 
-				this.proxy.controls = 0;
+			this.proxy.controls = 0;
 
-				this.playerloaded = true;
+			this.playerloaded = true;
+		}
+		else
+		{
+			let tobj = {
+				'videoId': this.params.src,
+				'playerVars': this.vars
+			};
+
+			if(!this.ismobile) {
+				this.proxy.loadVideoById(tobj);
 			}
-			else
-			{
-				var tobj = {
-					'videoId': str,
-					'playerVars': this.vars
-				};
 
-				if(!this.ismobile) {
-					this.proxy.loadVideoById(tobj);
-				}
-
-			}
-
-		} else { 	
-			setTimeout( () => { this.load(str); }, 1000 );
 		}
 	},
 	callback_ready() 		{ this.trace('------------------ callback_ready'); },
@@ -237,7 +266,7 @@ YTVideoPlayer.prototype = {
 				{
 					this.duration = this.proxy.getDuration();
 
-					if(this.startmuted) {
+					if( this.params.startmuted ) {
 						this.mute();
 					} else {
 						this.unmute();
@@ -249,7 +278,7 @@ YTVideoPlayer.prototype = {
 				// FAUX PROGRESS
 				this.callback_progress();
 				this.interval = setInterval( () => {
-					var phpercentage = 0;
+					let phpercentage = 0;
 
 					this.playhead = this.proxy.getCurrentTime();
 
@@ -431,13 +460,13 @@ if( !window['YT'] ) {
 
 	// NO API YET, LOAD MANUALLY
 	if(checkDebug) console.log('LOADING YT API');
-	var tag = document.createElement('script');
+	let tag = document.createElement('script');
 		tag.src = "https://www.youtube.com/iframe_api";
 
-	var firstScriptTag = document.getElementsByTagName('script')[0];
+	let firstScriptTag = document.getElementsByTagName('script')[0];
 		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-	var onYouTubeIframeAPIReady = () => {
+	let onYouTubeIframeAPIReady = () => {
 	 	if(checkDebug) console.log('YouTube API loaded');
 	};
 }
