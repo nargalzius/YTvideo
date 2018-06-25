@@ -1,36 +1,32 @@
-// @codekit-prepend "device.js"
+var vid = new YTVideoPlayer();
+    vid.dom_debug = document.getElementById('debug');
+var nonce = true;
 
-$( document ).ready(init);
+// vid.callback_progress = function() {
+//     // vid.trace(vid.playhead);
+// }
 
-function init(){
+// vid.callback_end = function() {
+//     if(nonce) {
+//         nonce = false;
+//         vid.load({
+//             src: 'IrZmf7q8SN4',
+//             startmuted: true,
+//             autoplay: true,
+//             allowfullscreen: false,
+//             chromeless: true
+//         });
+//     }
+// }
 
-    
-    var video = new YTVideoPlayer();
-    var video2 = new YTVideoPlayer();
+// vid.callback_play = function() {
+//     console.log(vid.params);
+// }
 
-    video.callback_progress = function() {
-        // video.trace(video.playhead);
-    }
-    
-    video.init({ 
-        id: 'videoPlayer',
-        src: 'NkbP-zzZR2w', 
-        startmuted: true,
-        autoplay: true,
-        captions: true
-    });
+// vid.init({src: '2b36Fo3R8Qk', autoplay: true, startmuted: true, start: 60, end: 70});
+vid.init({src: '2b36Fo3R8Qk', autoplay: true, startmuted: true});
 
-    // video2.destroy();
-    video2.init({
-        id: 'videoPlayerSmall',
-        src: 'M7lc1UVf-VE',
-        start: 30,
-        end: 300,
-        // chromeless: true,
-        autoplay: true,
-        // startmuted: true
-    });
-    
-    // video2.stop();
+
+document.getElementById('stop').onclick = function() {
+    vid.stop();
 }
-

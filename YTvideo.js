@@ -1,24 +1,24 @@
 /*!
- *	YOUTUBE VIDEO HELPER
+ *  YOUTUBE VIDEO HELPER
  *
- *	2.2
+ *  2.3
  *
- *	author: Carlo J. Santos
- *	email: carlosantos@gmail.com
- *	documentation: 
+ *  author: Carlo J. Santos
+ *  email: carlosantos@gmail.com
+ *  documentation:
  *
- *	Copyright (c) 2015, All Rights Reserved, www.nargalzius.com
+ *  Copyright (c) 2015, All Rights Reserved, www.nargalzius.com
  */
 
 function YTVideoPlayer() {
 	let fslistener = (e) => {
-		if(this.isfs) {
-			this.isfs = false;
+		if(this.flag_fs) {
+			this.flag_fs = false;
 			this.track_exitfs();
 		}
 		else {
 			this.track_enterfs();
-			this.isfs = true;
+			this.flag_fs = true;
 		}
 	}
 
@@ -28,182 +28,193 @@ function YTVideoPlayer() {
 }
 
 YTVideoPlayer.prototype = {
-	debug: true,
+	debug: false,
 	dom_debug: null,
-	playerloaded: false,
 	proxy: null,
-	allowfullscreen: false,
 	duration: null,
 	playhead: null,
-	interval: null,
+	percent: null,
 	params: {},
 	default_params: {
-		id: 'video',
-		src: 'NkbP-zzZR2w',
-		annotations: false,
-		captions: false,
-		chromeless: false,
-		autoplay: false,
-		allowfullscreen: false, 
-		loop: false,
-		startmuted: false,
-	},
-	vars: {},
-	default_vars: {
+		dom_id: 'video',
+		src: '2b36Fo3R8Qk',
 		autoplay: 0,
 		controls: 1,
 		modestbranding: 1,
 		disablekb: 1,
 		rel: 0,
 		showinfo: 0,
-		// iv_load_policy: 0,
 		iv_load_policy: 3,
-		cc_load_policy: 0,	
+		cc_load_policy: 0,
 		playsinline: 1,
 		enablejsapi: 1,
 		html5: 1,
 		color: 'white',
 		fs: 1,
-		loop: 0,
-
+		loop: 0
 	},
-	ismobile: false,
-	videostarted: false,
-	iscompleted: false,
-	ismuted: false,
-	isfs: false,
+	ismobile: null,
+	issafari: null,
 	api: false,
-	checkForMobile() {
-		const DESKTOP_AGENTS = [
-	        'desktop'
-	    ];
-
-	    let mobileFlag = true;
-
-	    if( window['device'] ) {
-	        // USE DEVICEJS IF AVAILABLE
-	        for (let i = 0; i < DESKTOP_AGENTS.length; i++) {
-	            let regex;
-	                regex = new RegExp(DESKTOP_AGENTS[i], 'i');
-
-	            if( window.document.documentElement.className.match(regex) ) {
-	                mobileFlag = false;
-	            }
-	        }
-	    } else {
-	        // BACKUP [RUDIMENTARY] DETECTION
-	        mobileFlag = 'ontouchstart' in window;
-	    }
-
-	    if( mobileFlag ) {
-	        this.ismobile = true;
-	        this.trace("mobile browser detected");
-	    } else {
-	        this.ismobile = false;
-	        this.trace("desktop browser detected");
-	    }
-	},
+	load_int: null,
+	init_int: null,
+	prog_int: null,
+	flag_playing: false,
+	flag_paused: false,
+	flag_muted: false,
+	flag_fs: false,
+	flag_finished: false,
+	flag_play_nonce: true,
+	flag_mute_nonce: true,
+	flag_end_nonce: false,
 
 	evaluate(params) {
-		
+
 		this.cInterval();
-		
-		this.videostarted = false;
+
+		this.flag_playing = false;
 		this.playhead = null;
 		this.duration = null;
 
-		this.params = {};
-		Object.assign(this.params, this.default_params);
-		if(params) for( let key in params ) this.params[key] = params[key];
+		if(Object.keys(this.params).length === 0 && this.params.constructor === Object) {
 
-		this.vars = {};
-		Object.assign(this.vars, this.default_vars);
-		
-		this.vars.iv_load_policy = ( this.params.annotations ) ? 1 : 0;
-		this.vars.cc_load_policy = ( this.params.captions ) ? 1 : 0;
-		this.vars.controls = ( this.params.chromeless ) ? 0 : 1;
-		this.vars.autoplay = ( this.params.autoplay ) ? 1 : 0;
-		this.vars.fs = ( this.params.allowfullscreen ) ? 1 : 0;
-		this.vars.loop = ( this.params.loop ) ? 1 : 0;
+			Object.assign(this.params, this.default_params);
 
-		if( this.params.start )
-			this.vars.start = this.params.start;
+			if(params && params.constructor === Object )
+				for( let key in params )
+					this.params[key] = params[key];
+		}
 
-		if( this.params.end )
-			this.vars.end = this.params.end;
+		this.trace(this.issafari, 'issafari')
 
-		// this.vars.origin = window.location.hostname;
-		// this.vars.widget_referrer
+		if( params && params.constructor === Object ) {
+			for( let key in params ) {
+				switch(key) {
+					case 'src':
+						this.params.src = params[key];
+					break;
+					case 'id':
+					case 'dom_id':
+						this.params.dom_id = params[key];
+					break;
+					case 'color':
+						this.params.color = params[key] ? params[key] : 'white';
+					break;
+					case 'annotations':
+					case 'iv_load_policy':
+						this.params.iv_load_policy = params[key] ? params[key] : 3;
+					break;
+					case 'captions':
+						this.params.cc_load_policy = params[key] ? 1 : 0;
+					break;
+					case 'chromeless':
+						this.params.controls = params[key] ? 0 : 1;
+					break;
+					case 'allowfullscreen':
+						this.params.fs = params[key] ? 1 : 0;
+					break;
+					case 'start':
+						this.params.start = params[key];
+					break;
+					case 'end':
+						this.params.end = params[key];
+					break;
+					default:
+						this.params[key] = params[key] ? 1 : 0;
+				}
+			}
+		} else
+		if( params && params.constructor === String )
+			this.params.src = params;
+		else
+		if( params && params.constructor === Boolean ) {
 
+		} else
+			delete this.params['src'];
+
+
+		// RESOLVE AUTOPLAY
+		if( this.params.autoplay ) {
+			if( this.ismobile ) {
+				this.params.autoplay = 0;
+				this.params.startmuted = 0;
+			} else 
+			if ( this.issafari && !this.params.startmuted )
+				this.params.autoplay = 0;
+		}
 	},
+
 	init(params) {
 
 		if( window['YT'] && YT.loaded ) {
 
+			clearInterval(this.init_int);
+
 			this.evaluate(params);
+			// this.trace(this.params, 'params (init)');
 
-			if(this.ismobile === null) { this.checkForMobile(); }
+			this.api = true;
 
-			this.dom_container = document.getElementById(params.id);
-
-			this.load(this.params)
+			if( this.ismobile === null ) { this.checkForMobile(); }
+			if( this.issafari === null ) { this.checkForSafari(); }
+			if( this.params.src ) this.load(this.params, true);
 
 		} else {
-			setTimeout(() => {
-				this.init(params);
-			}, 1000);
+			this.init_int = setTimeout(() => { this.init(params); }, 500);
 		}
 	},
-	load(params) {
 
-		this.trackReset();
+	load(params, bool) {
 
-		this.evaluate(params);
+		if(this.api) {
 
-		if(!this.playerloaded) {
-			this.proxy = new YT.Player(this.dom_container.id, {
+			clearInterval(this.load_int);
+
+			if(this.proxy) this.destroy();
+
+			if(!bool) {
+				delete this.params['start'];
+				delete this.params['end'];
+			}
+
+			this.evaluate(params);
+			this.trace(this.params, 'params (load)');
+
+			if(!this.dom_container) this.dom_container = document.getElementById(this.params.dom_id);
+
+			this.proxy = new YT.Player(this.params.dom_id, {
 				height: this.dom_container.offsetHeight,
 				width: this.dom_container.offsetWidth,
-				videoId: this.params.src,	
+				videoId: this.params.src,
 				events: {
-					'onReady': (e) => { 
+					'onReady': (e) => {
 						this.dlEventListener(e);
 					},
-					'onStateChange': (e) => { 
+					'onStateChange': (e) => {
 						this.dlEventListener(e);
 					},
-					'onPlaybackQualityChange': (e) => { 
+					'onPlaybackQualityChange': (e) => {
 						this.dlEventListener(e);
 					}
 				},
-				playerVars: this.vars
+				playerVars: this.params
 			});
 
-			this.proxy.controls = 0;
+			// this.proxy.loadVideoById(this.params.src);
 
-			this.playerloaded = true;
-		}
-		else
-		{
-			let tobj = {
-				'videoId': this.params.src,
-				'playerVars': this.vars
-			};
-
-			if(!this.ismobile) {
-				this.proxy.loadVideoById(tobj);
-			}
-
+		} else {
+			this.load_int = setTimeout(() => { this.load(params, bool); }, 500);
 		}
 	},
-	callback_ready() 		{ this.trace('------------------ callback_ready'); },
-	callback_end() 			{ this.trace('------------------ callback_end'); },
-	callback_play() 		{ this.trace('------------------ callback_play'); },
-	callback_pause() 		{ this.trace('------------------ callback_pause'); },
+
+	callback_ready()        { this.trace('------------------ callback_ready'); },
+	callback_stop()          { this.trace('------------------ callback_stop'); },
+	callback_play()         { this.trace('------------------ callback_play'); },
+	callback_pause()        { this.trace('------------------ callback_pause'); },
 	callback_volumechange() { this.trace('------------------ callback_volumechange'); },
-	callback_loading() 		{ /* this.trace('------------------ callback_loading');  */ },
-	callback_progress() 	{ /* this.trace('------------------ callback_progress'); */ },
-	
+	callback_loading()      { /* this.trace('------------------ callback_loading');  */ },
+	callback_progress()     { /* this.trace('------------------ callback_progress'); */ },
+
 	// TRACKING
 	track: {
 		started: false,
@@ -212,130 +223,189 @@ YTVideoPlayer.prototype = {
 		q75: false
 	},
 
-	trackReset() {
-		
+	resetTracking() {
 		this.track.started = false;
 		this.track.q25 = false;
 		this.track.q50 = false;
 		this.track.q75 = false;
 	},
-	
-	track_start() 	{ this.trace('------------------ track_start'); },
-	track_play() 	{ this.trace('------------------ track_play'); },
-	track_replay() 	{ this.trace('------------------ track_replay'); },
-	track_end() 	{ this.trace('------------------ track_end'); },
-	track_pause() 	{ this.trace('------------------ track_pause'); },
-	track_mute() 	{ this.trace('------------------ track_mute'); },
-	track_unmute() 	{ this.trace('------------------ track_unmute'); },
-	track_q25() 	{ this.trace('------------------ track_q25'); },
-	track_q50() 	{ this.trace('------------------ track_q50'); },
-	track_q75() 	{ this.trace('------------------ track_q75'); },
+
+	track_start()   { this.trace('------------------ track_start'); },
+	track_stop()	{ this.trace('------------------ track_stop'); },
+	track_play()    { this.trace('------------------ track_play'); },
+	track_replay()  { this.trace('------------------ track_replay'); },
+	track_end()     { this.trace('------------------ track_end'); },
+	track_pause()   { this.trace('------------------ track_pause'); },
+	track_mute()    { this.trace('------------------ track_mute'); },
+	track_unmute()  { this.trace('------------------ track_unmute'); },
+	track_q25()     { this.trace('------------------ track_q25'); },
+	track_q50()     { this.trace('------------------ track_q50'); },
+	track_q75()     { this.trace('------------------ track_q75'); },
 	track_enterfs() { this.trace('------------------ track_enterfs'); },
-	track_exitfs() 	{ this.trace('------------------ track_exitfs'); },
+	track_exitfs()  { this.trace('------------------ track_exitfs'); },
 
 	dlEventListener(e) {
+
+		this.trace(e.data);
 
 		switch( String(e.data) )
 		{
 			case 'null':
 				// READY
-				this.callback_ready();
 				this.cInterval();
+				this.resetTracking();
+				this.callback_ready();
 				this.playhead = 0;
-				this.trackReset();
+				this.duration = this.proxy.getDuration();
+
+				this.trace(this.duration, 'duration')
+
+				if( this.proxy && this.params.startmuted ) {
+					this.proxy.setVolume(0);
+				}
 			break;
 			case '-1':
 				// UNSTARTED
-				this.trace('unstarted');
 				this.cInterval();
+				this.resetTracking();
 				this.playhead = 0;
-				this.trackReset();
 			break;
 			case '0':
 				// ENDED
-				this.iscompleted = true;
-				this.callback_end();
-				this.track_end();
-				this.trackReset();
+				this.flag_finished = true;
 				this.cInterval();
+				this.resetTracking();
+
+				// this.trace(this.flag_end_nonce, 'flag_end_nonce');
+
+				if( !this.params.end && !this.params.start) {
+					this.track_end();
+					this.callback_stop();
+				} else {
+					if(this.flag_end_nonce) {
+						this.trace(this.percent, 'percent');
+						this.track_end();
+						this.callback_stop();
+					}
+					this.flag_end_nonce = false;
+				}
+
 				this.playhead = 0;
 			break;
 			case '1':
 				// PLAYING
-				if(!this.videostarted)
-				{
-					this.duration = this.proxy.getDuration();
-
-					if( this.params.startmuted ) {
-						this.mute();
-					} else {
-						this.unmute();
-					}
-
-					this.videostarted = true;
-				}
+				if(!this.flag_playing)
+					this.flag_playing = true;
 
 				// FAUX PROGRESS
 				this.callback_progress();
-				this.interval = setInterval( () => {
-					let phpercentage = 0;
 
+				this.prog_int = setInterval( () => {
+
+					this.percent = 0;
 					this.playhead = this.proxy.getCurrentTime();
 
-					if(this.duration)
-						phpercentage = ( this.playhead / this.duration ) * 100;
+					if(this.duration) {
+						if(this.params.end || this.params.start) {
 
-					// QUARTILES
-					if(!this.track.q25 && phpercentage >= 25) {
-					    this.track.q25 = true;
-					    
-						this.track_q25();
-					    
+							let start = this.params.start ? this.params.start : 0;
+							let end = this.params.end ? this.params.end : this.duration;
+
+							this.percent = this.rangePercent(this.playhead, start, end);
+						} else {
+							this.percent = ( this.playhead / this.duration ) * 100;
+						}
+
 					}
 					
-					if(!this.track.q50 && phpercentage >= 50) {
-					    this.track.q50 = true;
-					    
-					    this.track_q50();
-					    
-					}
-					
-					if(!this.track.q75 && phpercentage >= 75) {
-					    this.track.q75 = true;
-					    
-					    this.track_q75();
-					    
-					}
 
-					// MUTE STATE TRACKER
-					if(this.ismuted && !this.proxy.isMuted()) {
-						this.ismuted = false;
-						this.track_unmute();
+					if( this.withinRange() ) {
+
+						// QUARTILES
+						if(!this.track.q25 && this.percent >= 25) {
+							this.track.q25 = true;
+
+							this.track_q25();
+
+						}
+
+						if(!this.track.q50 && this.percent >= 50) {
+							this.track.q50 = true;
+
+							this.track_q50();
+
+						}
+
+						if(!this.track.q75 && this.percent >= 75) {
+							this.track.q75 = true;
+
+							this.track_q75();
+
+						}
+
+						// MUTE STATE TRACKER
+						if(this.flag_muted && !this.proxy.isMuted() && !this.flag_mute_nonce) {
+							this.flag_muted = false;
+							this.track_unmute();
+							this.callback_volumechange();
+						} else
+						if(!this.flag_muted && this.proxy.isMuted() && !this.flag_mute_nonce) {
+							this.flag_muted = true;
+							this.track_mute();
+							this.callback_volumechange();
+						} else {
+							this.flag_muted = this.proxy.isMuted();
+							this.flag_mute_nonce = false;
+						}
+
+						this.callback_progress();
+
 					}
-
-					if(!this.ismuted && this.proxy.isMuted()) {
-						this.ismuted = true;
-						this.track_mute();
-					}
-
-
-					this.callback_progress();
 
 				}, 250);
 
-				this.callback_play();
+				if( this.withinRange() )
+					this.callback_play();
 				
-				if(!this.track.started && !this.iscompleted) {
+
+				if(!this.track.started && !this.flag_finished) {
 					this.track.started = true;
+					this.flag_play_nonce = true;
+					this.flag_mute_nonce = true;
 					this.track_start();
+					
+					if(this.params.end || this.params.play) {
+						this.flag_end_nonce = true;
+						this.callback_play();
+					}
+
 				}
 				else {
-					if(this.iscompleted) {
-						this.iscompleted = false;
+					if(this.flag_finished) {
+						this.flag_finished = false;
 						this.track.started = true;
-						this.track_replay();
+						this.flag_play_nonce = true;
+						this.flag_mute_nonce = true;
+						if( this.withinRange() )
+							this.track_replay();
 					} else {
-						this.track_play();
+						if(this.flag_playing && !this.flag_play_nonce || this.flag_paused) {
+							if(!this.params.end && !this.params.start) {
+								this.track_play();
+							} else {
+								if( this.withinRange() )
+									this.track_play();
+								else {
+									// if(this.params.start)
+									// 	this.seek(this.params.start);
+									this.track_replay();
+									this.callback_play();
+								}
+							}
+						}
+
+						this.flag_paused = false;
+						this.flag_play_nonce = false;
 					}
 				}
 
@@ -343,10 +413,15 @@ YTVideoPlayer.prototype = {
 			case '2':
 				// PAUSED
 				this.cInterval();
-				
-				if( this.duration > this.playhead ) {
-					this.callback_pause();
-					this.track_pause();
+
+				if( this.duration > this.playhead && !this.flag_paused) {
+
+					this.flag_paused = true;
+
+					if( this.withinRange() ) {
+						this.callback_pause();
+						this.track_pause();
+					}
 				}
 			break;
 			case '3':
@@ -377,8 +452,29 @@ YTVideoPlayer.prototype = {
 			break;
 		}
 	},
+
+	withinRange() {
+
+		let bool = false;
+
+		if(!this.params.end && !this.params.start) {
+			return true;
+		} else {
+			return ( this.percent > 0 && this.percent < 95 );
+		}
+
+
+		if(this.params.end || this.params.start) {
+
+		
+
+		this.percent = this.rangePercent(this.playhead, start, end);
+		}
+
+	},
+
 	play() {
-		if(this.proxy) this.proxy.playVideo();
+		if(this.proxy && ( !this.flag_paused || this.flag_paused) ) this.proxy.playVideo();
 	},
 	pause() {
 		if(this.proxy) this.proxy.pauseVideo();
@@ -388,8 +484,14 @@ YTVideoPlayer.prototype = {
 			this.proxy.stopVideo();
 			this.proxy.clearVideo();
 		}
-		this.trackReset();
-		this.iscompleted = false;
+
+		delete this.params['start'];
+		delete this.params['end'];
+		this.resetTracking();
+		this.resetPlayback();
+
+		this.track_stop();
+		this.callback_stop();
 	},
 	seek(num) {
 		if(this.proxy) this.proxy.seekTo(num);
@@ -407,30 +509,44 @@ YTVideoPlayer.prototype = {
 	unmute() {
 		if(this.proxy) this.proxy.unMute();
 	},
-	isMuted() {
+	flag_muted() {
 		return this.proxy.isMuted();
 	},
 	isPlaying() {
 		return this.isplaying;
 	},
-	destroy() {
 
-		this.trackReset();
+	resetVariables() {
+		this.params = {};
+		this.load_int = null;
+		this.init_int = null;
+		this.prog_int = null;
+	},
+
+	resetPlayback() {
+		this.playhead = null;
+		this.percent = null;
+		this.duration = null;
+		this.flag_fs = false;
+		this.flag_playing = false;
+		this.flag_paused = false;
+		this.flag_finished = false;
+		this.flag_end_nonce = false;
+		this.flag_play_nonce = true;
+		this.flag_mute_nonce = true;
+	},
+
+	destroy() {
 
 		if(this.proxy)
 		{
-			this.stop();
-
 			this.cInterval();
-			this.playhead = 0;
+			this.stop();
+			this.resetVariables();
 
-			this.videostarted = false;
-			this.playerloaded = false;
-		
 			this.proxy.destroy();
 			this.proxy = null;
 
-			this.isfs = false;
 		}
 
 	},
@@ -438,18 +554,55 @@ YTVideoPlayer.prototype = {
 		if(this.proxy) this.proxy.setSize(this.dom_container.offsetWidth, this.dom_container.offsetHeight);
 	},
 	cInterval() {
-		clearInterval(this.interval);
+		clearInterval(this.prog_int);
 	},
-	trace(str) { 
 
+	checkForSafari() {
+        this.issafari = !!navigator.userAgent.match(/Version\/[\d\.]+.*Safari/);
+    },
+
+	checkForMobile() {
+		const DESKTOP_AGENTS = [
+			'desktop'
+		];
+
+		let mobileFlag = true;
+
+		if( window['device'] ) {
+			// USE DEVICEJS IF AVAILABLE
+			for (let i = 0; i < DESKTOP_AGENTS.length; i++) {
+				let regex;
+					regex = new RegExp(DESKTOP_AGENTS[i], 'i');
+
+				if( window.document.documentElement.className.match(regex) ) {
+					mobileFlag = false;
+				}
+			}
+		} else {
+			// BACKUP [RUDIMENTARY] DETECTION
+			mobileFlag = 'ontouchstart' in window;
+		}
+
+		if( mobileFlag ) {
+			this.ismobile = true;
+		} else {
+			this.ismobile = false;
+		}
+	},
+
+	rangePercent(arg, min, max) {
+		return ((arg - min) * 100) / (max - min)
+	},
+
+	trace(str, str2) {
 		if(this.debug) {
 
 			if(window.console) {
-				window.console.log(str);
+				window.console.log(str, str2 ? str2 : '');
 			}
 
 			if( this.dom_debug ) {
-				this.dom_debug.innerHTML += str + '<br>';
+				this.dom_debug.innerHTML += ( str2 ? ( str2 + ': ' ) : '' ) + str + '<br>';
 			}
 		}
 	}
@@ -467,6 +620,6 @@ if( !window['YT'] ) {
 		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 	let onYouTubeIframeAPIReady = () => {
-	 	if(checkDebug) console.log('YouTube API loaded');
+		if(checkDebug) console.log('YouTube API loaded');
 	};
 }

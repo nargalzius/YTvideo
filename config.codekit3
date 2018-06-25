@@ -50,7 +50,7 @@
 		"ft": 64,
 		"ma": 0,
 		"mi": 1,
-		"oA": 1,
+		"oA": 0,
 		"oAP": "\/public_html\/device.js",
 		"oF": 0,
 		"sC": 0,
@@ -114,6 +114,13 @@
 		"oS": 0,
 		"uL": 1
 		},
+	"\/project.sublime-project": {
+		"cB": 0,
+		"ft": 8192,
+		"oA": 1,
+		"oAP": "\/project.sublime-project",
+		"oF": 1
+		},
 	"\/README.md": {
 		"cB": 0,
 		"cS": 0,
@@ -135,19 +142,12 @@
 	"\/YTvideo.js": {
 		"ft": 64,
 		"ma": 0,
-		"mi": 1,
+		"mi": 0,
 		"oA": 0,
 		"oAP": "\/demo\/public_html\/YTvideo-min.js",
 		"oF": 2,
 		"sC": 0,
 		"tS": 1
-		},
-	"\/YTvideo.sublime-project": {
-		"cB": 0,
-		"ft": 8192,
-		"oA": 1,
-		"oAP": "\/YTvideo.sublime-project",
-		"oF": 1
 		}
 	},
 "hooks": [
