@@ -1,16 +1,23 @@
-html(lang="en")
+doctype html5
+html(lang='en')
 	head
-		meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1")
+		title YouTube Player Class
+		meta(http-equiv='Content-Type',content='text/html; charset=utf-8')
+		//- meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1")
 		link(rel="stylesheet", type="text/css", href="style.css")
 		script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js")
 		<script>var debug = true</script>
 		script(type="text/javascript", src="YTvideo-min.js")
 
 	body
-		#video.rel
-
-		button#stop stop
-
 		#debug.abs
 
-		script(type="text/javascript",src="main.js")
+		#video.rel
+
+		#buttons
+			button#video1.btn load video
+			button#video2.btn load video (autoplay)
+			button#video3.btn video (ranged autoplay)
+			button#video4.btn video (no controls)
+
+		script(type="text/javascript", src="main.js")

@@ -1,32 +1,46 @@
 var vid = new YTVideoPlayer();
+	vid.debug = true;
     vid.dom_debug = document.getElementById('debug');
-var nonce = true;
+	vid.init();
 
-// vid.callback_progress = function() {
-//     // vid.trace(vid.playhead);
-// }
-
-// vid.callback_end = function() {
-//     if(nonce) {
-//         nonce = false;
-//         vid.load({
-//             src: 'IrZmf7q8SN4',
-//             startmuted: true,
-//             autoplay: true,
-//             allowfullscreen: false,
-//             chromeless: true
-//         });
-//     }
-// }
-
-// vid.callback_play = function() {
-//     console.log(vid.params);
-// }
-
-// vid.init({src: '2b36Fo3R8Qk', autoplay: true, startmuted: true, start: 60, end: 70});
-vid.init({src: '2b36Fo3R8Qk', autoplay: true, startmuted: true});
-
-
-document.getElementById('stop').onclick = function() {
-    vid.stop();
+function debugReset() {
+	vid.dom_debug.innerHTML = '';
 }
+
+$('#debug').click(debugReset);
+
+$('.btn').click(function() {
+    switch( $(this).attr('id') ) {
+    	case 'video1':
+    		vid.load({
+    			src: '2b36Fo3R8Qk'
+    		});
+    	break;
+    	case 'video2':
+    		vid.load({
+    			src: '2b36Fo3R8Qk', 
+    			autoplay: true, 
+    			startmuted: true
+    		});
+    	break;
+    	case 'video3':
+    		vid.load({
+    			src: '2b36Fo3R8Qk', 
+    			autoplay: true, 
+    			startmuted: true, 
+    			start: 60, 
+    			end: 70
+    		});
+    	break;
+    	case 'video4':
+    		vid.load({
+    			src: '2b36Fo3R8Qk', 
+    			autoplay: true, 
+    			startmuted: false, 
+    			chromeless: true
+    		});
+    	break;
+    }
+
+    debugReset();
+});

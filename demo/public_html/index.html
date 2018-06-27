@@ -1,15 +1,21 @@
-
+<!DOCTYPE html5>
 <html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>YouTube Player Class</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" type="text/css" href="style.css"/>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script><script>var debug = true</script>
     <script type="text/javascript" src="YTvideo-min.js"></script>
   </head>
   <body>
-    <div id="video" class="rel"></div>
-    <button id="stop">stop</button>
     <div id="debug" class="abs"></div>
+    <div id="video" class="rel"></div>
+    <div id="buttons">
+      <button id="video1" class="btn">load video</button>
+      <button id="video2" class="btn">load video (autoplay)</button>
+      <button id="video3" class="btn">video (ranged autoplay)</button>
+      <button id="video4" class="btn">video (no controls)</button>
+    </div>
     <script type="text/javascript" src="main.js"></script>
   </body>
 </html>

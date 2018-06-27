@@ -1,10 +1,17 @@
-@import reset.sass
-@import global.sass
-@import url(http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css)
-
 html,
 body
 	font-family: sans-serif
+
+.btn
+	cursor: pointer
+
+.abs
+	position: absolute
+	display: block
+
+.rel
+	position: relative
+	display: block
 
 #video
 	display: block
@@ -12,9 +19,16 @@ body
 	z-index: 10
 	width: 640px
 	height: 360px
-	background-color: #000
-	margin: 20 auto
+	background-color: #CCC
+	margin: 20px auto
+
+#buttons
+	width: 100%
+	text-align: center
 
 #debug
-	bottom: 0
-	color: #CCC
+	bottom: 10px
+	right: 10px
+	text-align: right
+	color: #666
+	font-size: 12px
