@@ -1,7 +1,7 @@
 /*!
  *  YOUTUBE VIDEO HELPER
  *
- *  2.4
+ *  2.5
  *
  *  author: Carlo J. Santos
  *  email: carlosantos@gmail.com
@@ -11,6 +11,7 @@
  */
 
 /* eslint-disable no-console */
+/* eslint comma-dangle: ["error", "only-multiline"] */
 /* global YT */
 /* global debug */
 /* eslint no-unused-vars: ["error", { "varsIgnorePattern": "onYouTubeIframeAPIReady" }] */
@@ -43,7 +44,7 @@ YTVideoPlayer.prototype = {
     params: {},
     default_params: {
         dom_id: 'video',
-        src: '2b36Fo3R8Qk',
+        src: 'g4xFfwe9nS8',
         autoplay: 0,
         controls: 1,
         modestbranding: 1,
@@ -217,14 +218,40 @@ YTVideoPlayer.prototype = {
         }
     },
 
-    callback_ready()        { this.trace('------------------ callback_ready');              },
-    callback_stop()         { this.trace('------------------ callback_stop');               },
-    callback_play()         { this.trace('------------------ callback_play');               },
-    callback_start()        { this.trace('------------------ callback_start');              },
-    callback_pause()        { this.trace('------------------ callback_pause');              },
-    callback_volumechange() { this.trace('------------------ callback_volumechange');       },
-    callback_loading()      { /* this.trace('------------------ callback_loading');  */     },
-    callback_progress()     { /* this.trace('------------------ callback_progress'); */     },
+    track_start()           { this.trace('track_start', 'DEFAULT CALLBACK'); },
+    track_stop()            { this.trace('track_stop', 'DEFAULT CALLBACK'); },
+    track_end()             { this.trace('track_end', 'DEFAULT CALLBACK'); },
+    track_play()            { this.trace('track_play', 'DEFAULT CALLBACK'); },
+    track_replay()          { this.trace('track_replay', 'DEFAULT CALLBACK'); },
+    track_pause()           { this.trace('track_pause', 'DEFAULT CALLBACK'); },
+    track_mute()            { this.trace('track_mute', 'DEFAULT CALLBACK'); },
+    track_unmute()          { this.trace('track_unmute', 'DEFAULT CALLBACK'); },
+    track_q25()             { this.trace('track_q25', 'DEFAULT CALLBACK'); },
+    track_q50()             { this.trace('track_q50', 'DEFAULT CALLBACK'); },
+    track_q75()             { this.trace('track_q75', 'DEFAULT CALLBACK'); },
+    track_enterfs()         { this.trace('track_enterfs', 'DEFAULT CALLBACK'); },
+    track_exitfs()          { this.trace('track_exitfs', 'DEFAULT CALLBACK'); },
+
+    // callback_buffer()   {},
+    // callback_loading()  {},
+    callback_progress() {},
+    callback_ready()        { this.trace('callback_ready', 'DEFAULT CALLBACK');              },
+    // callback_end()          { this.trace('callback_end', 'DEFAULT CALLBACK'); },
+    callback_play()         { this.trace('callback_play', 'DEFAULT CALLBACK');               },
+    callback_stop()         { this.trace('callback_stop', 'DEFAULT CALLBACK');               },    
+    callback_pause()        { this.trace('callback_pause', 'DEFAULT CALLBACK');              },
+    callback_start()        { this.trace('callback_start', 'DEFAULT CALLBACK');              },    
+    // callback_error(str1, str2)  { this.trace(str1, str2); },
+    callback_volume()       {
+
+        let tempstr = '';
+
+        if(this.notifications.volume) tempstr = this.flag_muted ? ' (muted)' : ' (unmuted)';
+
+        this.trace('callback_volume'+tempstr, 'DEFAULT CALLBACK');
+
+    },
+
 
     // TRACKING
     track: {
@@ -240,20 +267,6 @@ YTVideoPlayer.prototype = {
         this.track.q50 = false;
         this.track.q75 = false;
     },
-
-    track_start()   { this.trace('------------------ track_start'); },
-    track_stop()    { this.trace('------------------ track_stop'); },
-    track_play()    { this.trace('------------------ track_play'); },
-    track_replay()  { this.trace('------------------ track_replay'); },
-    track_end()     { this.trace('------------------ track_end'); },
-    track_pause()   { this.trace('------------------ track_pause'); },
-    track_mute()    { this.trace('------------------ track_mute'); },
-    track_unmute()  { this.trace('------------------ track_unmute'); },
-    track_q25()     { this.trace('------------------ track_q25'); },
-    track_q50()     { this.trace('------------------ track_q50'); },
-    track_q75()     { this.trace('------------------ track_q75'); },
-    track_enterfs() { this.trace('------------------ track_enterfs'); },
-    track_exitfs()  { this.trace('------------------ track_exitfs'); },
 
     eventHandler(e) {
 
@@ -357,7 +370,7 @@ YTVideoPlayer.prototype = {
                             }
 
                             if(!this.flag_vol_nonce)
-                                this.callback_volumechange();
+                                this.callback_volume();
 
                             this.flag_vol_nonce = false;
                             this.flag_muted = muted;
@@ -434,7 +447,7 @@ YTVideoPlayer.prototype = {
             case '3':
                 // BUFFERING
                 this.cInterval();
-                this.callback_loading();
+                // this.callback_loading();
             break;
             case 'tiny':
 
@@ -610,13 +623,19 @@ YTVideoPlayer.prototype = {
 
     trace(str, str2) {
         if(this.debug) {
-            if(window['console']) console.log(str, str2 ? str2 : '');
+
+            if(window['console']) {
+                if(str2)
+                    console.log(str, str2);
+                else
+                    console.log(str);
+            }
 
             if( this.dom_debug ) {
                 this.dom_debug.innerHTML += ( str2 ? str2 + ': ' : '' ) + str + '<br>';
             }
         }
-    }
+    },
 };
 
 if( !window['YT'] ) {
